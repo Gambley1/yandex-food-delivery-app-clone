@@ -49,6 +49,7 @@ class CartStateT {
         _loadingSubject.sink.add(false);
         logger.e('failed to load cart Items');
         logger.e('failed to load cart Items');
+        logger.e('failed to load cart Items');
       }
     }
   }
