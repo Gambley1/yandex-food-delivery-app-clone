@@ -8,13 +8,14 @@ class ForgotPassword extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
-      child: GestureDetector(
-        onTap: () {},
+      child: TextButton(
+        clipBehavior: Clip.none,
         child: const KText(
           text: 'Forgot password?',
-          size: 15,
           fontWeight: FontWeight.bold,
+          color: Colors.black,
         ),
+        onPressed: () {},
       ),
     );
   }

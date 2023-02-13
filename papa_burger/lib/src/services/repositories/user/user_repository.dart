@@ -1,4 +1,3 @@
-import 'package:logger/logger.dart';
 import 'package:papa_burger/src/restaurant.dart';
 import 'package:papa_burger/src/services/repositories/user/base_user_repository.dart';
 
@@ -7,7 +6,6 @@ class UserRepository implements BaseUserRepository{
     required this.api,
   });
 
-  final Logger logger = Logger();
   final Api api;
 
   @override
@@ -15,11 +13,11 @@ class UserRepository implements BaseUserRepository{
     try {
       final storage = Prefs.instance;
       final apiUser = await api.signIn(email, password);
-      logger.d(apiUser);
+      logger.i(apiUser);
       await storage.saveToken(apiUser.token);
       await storage.saveEmail(email);
     } on InvalidCredentialsApiException {
-      logger.d('Invalid Credentials');
+      logger.e('Invalid Credentials');
       throw InvalidCredentialsException();
     }
   }

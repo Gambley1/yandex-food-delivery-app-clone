@@ -12,10 +12,8 @@ final _globalBucket = PageStorageBucket();
 class OrdersView extends StatefulWidget {
   const OrdersView({
     Key? key,
-    required this.userRepository,
   }) : super(key: key);
 
-  final UserRepository userRepository;
 
   @override
   State<OrdersView> createState() => _OrdersViewState();
@@ -62,7 +60,7 @@ class _OrdersViewState extends State<OrdersView> with WidgetsBindingObserver {
     _timer?.cancel();
     _saveDuration();
     WidgetsBinding.instance.addObserver(this);
-    logger.d('disposed');
+    logger.i('disposed');
     super.dispose();
   }
 
@@ -78,12 +76,12 @@ class _OrdersViewState extends State<OrdersView> with WidgetsBindingObserver {
     if (seconds < 0) {
       _stopTimer();
       _removePermission();
-      logger.d(seconds);
-      logger.d(hasPermission);
+      logger.i(seconds);
+      logger.i(hasPermission);
     } else {
       if (!mounted) return;
       _duration = Duration(seconds: seconds);
-      logger.d(seconds);
+      logger.i(seconds);
     }
   }
 
@@ -92,7 +90,7 @@ class _OrdersViewState extends State<OrdersView> with WidgetsBindingObserver {
     setState(() {
       _timer?.cancel();
     });
-    logger.d('stopped');
+    logger.i('stopped');
   }
 
   void _removePermission() {
@@ -103,7 +101,7 @@ class _OrdersViewState extends State<OrdersView> with WidgetsBindingObserver {
 
   Future<void> _saveDuration() async {
     final storage = Prefs.instance;
-    logger.d('saved');
+    logger.i('saved');
     await storage.saveTimer(_duration.inSeconds);
   }
 
@@ -120,7 +118,7 @@ class _OrdersViewState extends State<OrdersView> with WidgetsBindingObserver {
     if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused) {
       _saveDuration();
-      logger.d('save duration');
+      logger.i('save duration');
       if (!mounted) return;
       _stopTimer();
     } else if (state == AppLifecycleState.resumed) {
@@ -133,10 +131,10 @@ class _OrdersViewState extends State<OrdersView> with WidgetsBindingObserver {
           });
         });
       } catch (e) {
-        logger.d(e.toString());
+        logger.i(e.toString());
       }
     }
-    logger.d('AppLifeCycleState $state');
+    logger.i('AppLifeCycleState $state');
   }
 
   @override

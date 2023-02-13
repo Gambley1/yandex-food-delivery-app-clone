@@ -42,7 +42,6 @@ class _SearchViewState extends State<SearchView>
                 .toLowerCase()
                 .contains(inputedKeyword.toLowerCase()))
             .toList();
-        logger.d(results);
       }
 
       setState(() {
@@ -52,7 +51,7 @@ class _SearchViewState extends State<SearchView>
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 12, 12, 12),
+      padding: const EdgeInsets.fromLTRB(0, 0, 12, 12),
       child: Row(
         children: [
           CustomIcon(
@@ -86,27 +85,10 @@ class _SearchViewState extends State<SearchView>
   }
 
   _foundResults(BuildContext context) {
-    final menuItems = context
-        .select<MainPageBloc, List<Restaurant>>((b) => b.state.restaurants);
     return Expanded(
       child: filteredItems.isEmpty
           ? searchController!.text.isEmpty
-              ? ListView.builder(
-                  itemCount: menuItems.length,
-                  itemBuilder: (context, index) {
-                    final name = menuItems[index].menu[index].items[index].name;
-                    final desc =
-                        menuItems[index].menu[index].items[index].description;
-                    final price = menuItems[index]
-                        .menu[index]
-                        .items[index]
-                        .getMenuItemsPrice;
-                    // final imgPathPng =
-                    //     meals[index].imagePathPng.replaceAll(' ', '');
-
-                    return _mealListTile(name, desc, price);
-                  },
-                )
+              ? Container()
               : const Center(
                   child: Text('Nothing found'),
                 )
@@ -126,7 +108,8 @@ class _SearchViewState extends State<SearchView>
                     itemBuilder: (context, index) {
                       final name = filteredItems[index].name;
                       final desc = filteredItems[index].description;
-                      final price = filteredItems[index].getMenuItemsPrice;
+                      final price =
+                          filteredItems[index].getMenusItemsPriceString;
                       // final imgPathPng =
                       //     filteredItems[index].imagePathPng.replaceAll(' ', '');
 

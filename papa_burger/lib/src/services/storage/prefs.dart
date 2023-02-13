@@ -36,30 +36,30 @@ class Prefs {
     return getToken;
   }
 
-  Future<bool> saveEmail(String email) async {
-    return await _prefs.setString('email', email);
+  Future<void> saveEmail(String email) async {
+    await _prefs.setString('email', email);
   }
 
   String get getEmail => _prefs.getString('email') ?? '';
 
-  Future<bool> savePassword(String password) async {
-    return await _prefs.setString('password', password);
+  Future<void> savePassword(String password) async {
+    await _prefs.setString('password', password);
   }
 
   String get getPassword => _prefs.getString('password') ?? '';
 
-  Future<bool> saveUsername(String username) async {
-    return await _prefs.setString('user_name', username);
+  Future<void> saveUsername(String username) async {
+    await _prefs.setString('user_name', username);
   }
 
   String get getUsername => _prefs.getString('user_name') ?? '';
 
-  Future<bool> setFirstInstall() async {
-    return await _prefs.setBool('isFirstInstall', true);
+  Future<void> setFirstInstall() async {
+    await _prefs.setBool('isFirstInstall', true);
   }
 
-  Future<bool> saveTimer(int duration) async {
-    return await _prefs.setInt('duration', duration);
+  Future<void> saveTimer(int duration) async {
+    await _prefs.setInt('duration', duration);
   }
 
   int get getTimer => _prefs.getInt('duration') ?? 60;

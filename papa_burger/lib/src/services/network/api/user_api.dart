@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:logger/logger.dart';
 import 'package:papa_burger/src/restaurant.dart';
 
 typedef UserTokenSupplier = Future<String?> Function();
@@ -9,21 +8,23 @@ typedef UserTokenSupplier = Future<String?> Function();
 // such as User Repository and Restaurant Repository in order to make the code clearer
 class Api {
   Api({
-    required UserTokenSupplier userTokenSupplier,
+    // required UserTokenSupplier userTokenSupplier,
+    required Prefs prefs,
     Dio? dio,
     UrlBuilder? urlBuilder,
   })  : _dio = dio ?? Dio(),
-        _urlBuilder = urlBuilder ?? const UrlBuilder() {
-    _dio.setUpAuthHeaders(userTokenSupplier);
-    _dio.interceptors.add(LogInterceptor(responseBody: false));
+        _urlBuilder = urlBuilder ?? const UrlBuilder(),
+        _prefs = prefs {
+    // _dio.setUpAuthHeaders(userTokenSupplier);
+    // _dio.interceptors.add(LogInterceptor(responseBody: false));
     _dio.options.connectTimeout = 5 * 1000;
     _dio.options.receiveTimeout = 5 * 1000;
     _dio.options.sendTimeout = 5 * 1000;
   }
 
   final GoogleSignIn _googleSignIn = GoogleSignIn();
-  final Logger logger = Logger();
   final Dio _dio;
+  final Prefs _prefs;
   final UrlBuilder _urlBuilder;
 
   Future<User> signIn(String email, String password) async {
@@ -45,17 +46,17 @@ class Api {
       // Here we check if there is any errors. if the error is == 400
       // we trhow an error InvalidCredentials otherwise we just rethrow
       if (error.response?.statusCode == 400) {
-        logger.d('Invalid Credentials');
+        logger.e('Invalid Credentials');
         throw InvalidCredentialsApiException();
       }
       if (error.type == DioErrorType.connectTimeout ||
           error.type == DioErrorType.receiveTimeout ||
           error.type == DioErrorType.sendTimeout) {
-        logger.d(error.type);
-        logger.d(error.message);
+        logger.e(error.type);
+        logger.e(error.message);
       }
 
-      logger.d(error.message);
+      logger.e(error.message);
       rethrow;
     }
   }
@@ -76,11 +77,11 @@ class Api {
       );
       return loggedInUser;
     } catch (error) {
-      logger.d(error);
+      logger.e(error);
       rethrow;
     }
   }
-  
+
   Future<void> signOut() async {
     // Here we building a url to SignOut
     final url = _urlBuilder.buildSingOutUrl();
@@ -88,33 +89,33 @@ class Api {
     await _dio.delete(url);
     // Using SharedPreferences to cache our data we have to delete it aftern the user signed out
     // so afterwards he has no cached data
-    await Prefs.instance.deleteData();
+    await _prefs.deleteData();
   }
 }
 
-// Declaring appToken into the Authorization field to access API calls
-extension on Dio {
-  static const _appTokenEnvironmentVariableKey = 'fav-qs-app-token';
+// // Declaring appToken into the Authorization field to access API calls
+// extension on Dio {
+//   static const _appTokenEnvironmentVariableKey = 'fav-qs-app-token';
 
-  void setUpAuthHeaders(UserTokenSupplier userTokenSupplier) {
-    const appToken = String.fromEnvironment(
-      _appTokenEnvironmentVariableKey,
-    );
-    options = BaseOptions(headers: {
-      'Authorization': 'Token token=$appToken',
-    });
-    interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          String? userToken = await userTokenSupplier();
-          if (userToken != null) {
-            options.headers.addAll({
-              'User-Token': userToken,
-            });
-          }
-          return handler.next(options);
-        },
-      ),
-    );
-  }
-}
+//   void setUpAuthHeaders(UserTokenSupplier userTokenSupplier) {
+//     const appToken = String.fromEnvironment(
+//       _appTokenEnvironmentVariableKey,
+//     );
+//     options = BaseOptions(headers: {
+//       'Authorization': 'Token token=$appToken',
+//     });
+//     interceptors.add(
+//       InterceptorsWrapper(
+//         onRequest: (options, handler) async {
+//           String? userToken = await userTokenSupplier();
+//           if (userToken != null) {
+//             options.headers.addAll({
+//               'User-Token': userToken,
+//             });
+//           }
+//           return handler.next(options);
+//         },
+//       ),
+//     );
+//   }
+// }

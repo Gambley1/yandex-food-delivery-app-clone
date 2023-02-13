@@ -20,6 +20,7 @@ class CachedImage extends StatelessWidget {
     this.left = 20,
     this.top = 20,
     this.right = 0,
+    this.radius = kDefaultBorderRadius,
     this.sizeXMark = 18,
     this.sizeSimpleIcon = 32,
     required this.imageType,
@@ -33,7 +34,8 @@ class CachedImage extends StatelessWidget {
       right,
       bottom,
       sizeXMark,
-      sizeSimpleIcon;
+      sizeSimpleIcon,
+      radius;
   final CacheImageType imageType;
 
   @override
@@ -53,25 +55,30 @@ class CachedImage extends StatelessWidget {
               height: height,
               width: width,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(kDefaultBorderRadius),
                 image: DecorationImage(
                   image: imageProvider,
                   fit: BoxFit.cover,
                 ),
               ),
             ),
-            placeholder: (context, url) => Container(
-              height: height,
+            // placeholder: (context, url) => Container(
+            //   height: height,
+            //   width: width,
+            //   decoration: BoxDecoration(
+            //     borderRadius: BorderRadius.circular(16),
+            //     image: const DecorationImage(
+            //       image: AssetImage(
+            //         'assets/images/PlaceHolderImage.jpg',
+            //       ),
+            //       fit: BoxFit.cover,
+            //     ),
+            //   ),
+            // ),
+            placeholder: (context, url) => ShimmerLoading(
+              radius: kDefaultBorderRadius,
               width: width,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                image: const DecorationImage(
-                  image: AssetImage(
-                    'assets/images/PlaceHolderImage.jpg',
-                  ),
-                  fit: BoxFit.fill,
-                ),
-              ),
+              height: height,
             ),
             errorWidget: (context, url, error) {
               // logger.d(error.toString());
@@ -80,7 +87,7 @@ class CachedImage extends StatelessWidget {
                 width: width,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(
-                    16,
+                    radius,
                   ),
                 ),
                 child: Stack(
@@ -130,16 +137,18 @@ class CachedImage extends StatelessWidget {
                 ),
               ),
             ),
-            placeholder: (context, url) => Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(
-                    'assets/images/PlaceHolderImage.jpg',
-                  ),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
+            // placeholder: (context, url) => Container(
+            //   decoration: const BoxDecoration(
+            //     image: DecorationImage(
+            //       image: AssetImage(
+            //         'assets/images/PlaceHolderImage.jpg',
+            //       ),
+            //       fit: BoxFit.cover,
+            //     ),
+            //   ),
+            // ),
+            placeholder: (context, url) => const ShimmerLoading(),
+            placeholderFadeInDuration: const Duration(seconds: 2),
             errorWidget: (context, url, error) {
               // logger.d(error.toString());
               return const Center(
@@ -151,15 +160,3 @@ class CachedImage extends StatelessWidget {
           );
   }
 }
-
-// class CustomFadeInImage extends StatelessWidget {
-//   const CustomFadeInImage({Key? key}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return FadeInImage.assetNetwork(
-//       image: ,
-//       placeholder: ,
-//     );
-//   }
-// }

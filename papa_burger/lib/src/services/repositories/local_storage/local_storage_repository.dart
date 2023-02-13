@@ -1,13 +1,19 @@
 import 'package:hive/hive.dart';
 import 'package:papa_burger/src/restaurant.dart';
 
-class LocalStorageRepository implements BaseLocalStorageRepository {
-  String boxName = 'cart_items';
-  Type boxType = Item;
+class LocalStorageRepository with BaseLocalStorageRepository {
+  static const String cart = 'cart_items';
+  static const String restaurantId = 'restaurant_id';
 
   @override
-  Future<Box> openBox() async {
-    Box box = await Hive.openBox<Item>(boxName);
+  Future<Box> openBoxCart() async {
+    Box box = await Hive.openBox<Item>(cart);
+    return box;
+  }
+
+  @override
+  Future<Box> openBoxRestaurantId() async {
+    Box box = await Hive.openBox<Restaurant>(restaurantId);
     return box;
   }
 
@@ -17,13 +23,20 @@ class LocalStorageRepository implements BaseLocalStorageRepository {
   }
 
   @override
-  Future<void> addRestaurantIdToCart(Box box, int restaurantId) async {
-    await box.put(restaurantId.toString(), restaurantId);
+  Future<void> addRestaurantIdToCart(Box box, Restaurant restaurant) async {
+    await box.put(restaurant.name, restaurant);
   }
 
   @override
   Set<Item> getItemsFromStorage(Box box) {
     return box.values.toSet() as Set<Item>;
+  }
+
+  @override
+  Stream<int> getRestaurantIdFromStorage(Box box) async* {
+    logger.i('stream emitted');
+    if (box.values.isEmpty) yield 1;
+    yield 2;
   }
 
   @override
@@ -36,8 +49,9 @@ class LocalStorageRepository implements BaseLocalStorageRepository {
     await box.delete(cartItem.name);
   }
 
-  // @override
-  // int getRestaurantIdInCart(Box box) {
-  //   return box.values.first as int;
-  // }
+  @override
+  Future<void> removeRestaurantIdFromCart(
+      Box box, Restaurant restaurant) async {
+    await box.delete(restaurant.name);
+  }
 }

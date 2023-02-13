@@ -21,13 +21,15 @@ class RestaurantApi {
   Future<List<Restaurant>> getListRestaurants(Map<String, dynamic> json) async {
     try {
       final List restaurants = json['restaurants'];
-      return restaurants
-          .map<Restaurant>(
-            (rest) => Mapper.restaurantFromJson(rest),
-          )
-          .toList();
+      return restaurants.isNotEmpty
+          ? restaurants
+              .map<Restaurant>(
+                (rest) => Mapper.restaurantFromJson(rest),
+              )
+              .toList()
+          : [];
     } catch (e) {
-      logger.d(e.toString(), 'restaurant error');
+      logger.e(e.toString(), 'restaurant error');
       rethrow;
     }
   }

@@ -1,5 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:papa_burger/src/restaurant.dart';
 
 part 'main_page_event.dart';
@@ -7,12 +10,20 @@ part 'main_page_state.dart';
 
 class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
   MainPageBloc({
+    required CartCubit cartCubit,
+    required UserRepository userRepository,
     required this.api,
-  }) : super(MainPageState()) {
+  })  : _cartCubit = cartCubit,
+        _userRepository = userRepository,
+        super(
+          MainPageState(),
+        ) {
     on<LoadMainPageEvent>(_onLoadMainPage);
     on<FilterRestaurantsEvent>(_onFindFilteredRestaurants);
   }
 
+  final CartCubit _cartCubit;
+  final UserRepository _userRepository;
   final RestaurantApi api;
 
   Future<void> _onLoadMainPage(
@@ -29,16 +40,24 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
       final restaurants = await api.getListRestaurants(
         restaurantsJson(),
       );
-      emit(
-        state.copyWith(
-          restaurants: restaurants,
-          mainPageRequest: MainPageRequest.requestSuccess,
-        ),
-      );
+      if (restaurants.isNotEmpty) {
+        emit(
+          state.copyWith(
+            restaurants: restaurants,
+            mainPageRequest: MainPageRequest.requestSuccess,
+          ),
+        );
+      } else {
+        emit(
+          state.copyWith(
+            restaurants: restaurants,
+            mainPageRequest: MainPageRequest.requestSuccess,
+          ),
+        );
+      }
     } catch (_) {
       errorStateMainPage(emit);
     }
-    logger.d('on load event');
   }
 
   Future<void> _onFindFilteredRestaurants(
@@ -51,10 +70,7 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
     try {
       emit(
         state.copyWith(
-          filteredRestaurants: [
-            ...state.filteredRestaurants,
-            ...event.filteredRestaurants,
-          ],
+          filteredRestaurants: event.filteredRestaurants,
           mainPageRequest: MainPageRequest.filterRequestSucces,
         ),
       );
@@ -64,7 +80,28 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
           mainPageRequest: MainPageRequest.filterRequestFailure,
         ),
       );
-      logger.d('error whilte finding filtered restaurants');
+      logger.e('error whilte finding filtered restaurants');
+    }
+  }
+
+  Future<void> logOutFromAccount(
+    BuildContext context,
+  ) async {
+    try {
+      _cartCubit.removeAllItemFromCart();
+      _userRepository.api.signOut().then(
+            (value) => Navigator.of(context).pushReplacement(
+              PageTransition(
+                child: const LoginView(),
+                type: PageTransitionType.fade,
+              ),
+            ),
+          );
+    } catch (e) {
+      logger.e(
+        'error while loggin out from account in main page',
+        e.toString(),
+      );
     }
   }
 
@@ -74,7 +111,7 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
         cartRequest: CartRequest.requestFailure,
       ),
     );
-    logger.d('cart error occured');
+    logger.e('cart error occured');
   }
 
   void errorStateMainPage(Emitter<MainPageState> emit) {
@@ -83,6 +120,6 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
         mainPageRequest: MainPageRequest.mainPageRequestFailure,
       ),
     );
-    logger.d('main page error occured');
+    logger.e('main page error occured');
   }
 }

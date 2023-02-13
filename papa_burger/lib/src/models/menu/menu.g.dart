@@ -19,8 +19,8 @@ class ItemAdapter extends TypeAdapter<Item> {
     return Item(
       name: fields[0] as String,
       description: fields[1] as String,
-      price: fields[2] as int,
-      imgName: fields[3] as String?,
+      imageUrl: fields[2] as String,
+      price: fields[3] as double,
     );
   }
 
@@ -33,9 +33,9 @@ class ItemAdapter extends TypeAdapter<Item> {
       ..writeByte(1)
       ..write(obj.description)
       ..writeByte(2)
-      ..write(obj.price)
+      ..write(obj.imageUrl)
       ..writeByte(3)
-      ..write(obj.imgName);
+      ..write(obj.price);
   }
 
   @override

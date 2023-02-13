@@ -33,6 +33,7 @@ class KText extends StatelessWidget {
           fontWeight: fontWeight,
           fontSize: size,
           letterSpacing: letterSpacing,
+          
         ),
       ),
       overflow: textOverflow,

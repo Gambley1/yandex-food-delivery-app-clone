@@ -4,10 +4,7 @@ import 'package:papa_burger/src/restaurant.dart';
 class LoginView extends StatelessWidget {
   const LoginView({
     Key? key,
-    required this.userRepository,
   }) : super(key: key);
-
-  final UserRepository userRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -26,18 +23,16 @@ class LoginView extends StatelessWidget {
               Column(
                 children: [
                   const LoginImage(),
-                  LoginForm(
-                    userRepository: userRepository,
-                  ),
+                  const LoginForm(),
                   SizedBox(
-                    height: AppDimen.h12,
+                    height: AppDimen.h6,
                   ),
                   const KText(
                     text: 'Or sign in',
                     color: Colors.black54,
                   ),
                   SizedBox(
-                    height: AppDimen.h4,
+                    height: AppDimen.h6,
                   ),
                   LoginWithGoogleAndFacebook(
                     height: AppDimen.h60,

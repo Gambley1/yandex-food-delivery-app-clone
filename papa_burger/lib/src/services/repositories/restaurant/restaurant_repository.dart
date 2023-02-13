@@ -12,9 +12,9 @@ class RestaurantRepository implements BaseRestaurantRepository {
   Future<void> getListRestaurants(Map<String, dynamic> json) async {
     try {
       final restaurants = await api.getListRestaurants(json);
-      logger.d(restaurants);
+      logger.i(restaurants);
     } catch (e) {
-      logger.d(e.toString(), 'restaurant error');
+      logger.e(e.toString(), 'restaurant error');
       rethrow;
     }
   }

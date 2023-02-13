@@ -8,18 +8,13 @@ import 'package:papa_burger/src/restaurant.dart';
 class LoginForm extends StatelessWidget {
   const LoginForm({
     Key? key,
-    required this.userRepository,
   }) : super(key: key);
-
-  final UserRepository userRepository;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: AppDimen.w30),
-      child: _LogInForm(
-        userRepository: userRepository,
-      ),
+      child: const _LogInForm(),
     );
   }
 }
@@ -27,10 +22,7 @@ class LoginForm extends StatelessWidget {
 class _LogInForm extends StatefulWidget {
   const _LogInForm({
     Key? key,
-    required this.userRepository,
   }) : super(key: key);
-
-  final UserRepository userRepository;
 
   @override
   State<_LogInForm> createState() => __LogInFormState();
@@ -70,12 +62,9 @@ class __LogInFormState extends State<_LogInForm> {
           oldState.submissionStatus != newState.submissionStatus,
       listener: (context, state) {
         if (state.submissionStatus == SubmissionStatus.success) {
-          Navigator.pushReplacement(
-            context,
+          Navigator.of(context).pushReplacement(
             PageTransition(
-              child: MainPageView(
-                userRepository: widget.userRepository,
-              ),
+              child: const MainPageView(),
               type: PageTransitionType.fade,
             ),
           );
@@ -171,11 +160,11 @@ class __LogInFormState extends State<_LogInForm> {
                 );
               },
             ),
-            SizedBox(
-              height: AppDimen.h16,
-            ),
+            const ForgotPassword(),
             isSubmissionInProggress
-                ? ExpandedElevatedButton.inProgress(label: '', )
+                ? ExpandedElevatedButton.inProgress(
+                    label: '',
+                  )
                 : ExpandedElevatedButton(
                     label: 'Login',
                     onTap: cubit.onSubmit,

@@ -36,8 +36,9 @@ class ExpandedElevatedButton extends StatelessWidget {
           ? ElevatedButton.icon(
               onPressed: onTap,
               style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
               label: KText(
@@ -50,7 +51,7 @@ class ExpandedElevatedButton extends StatelessWidget {
           : ElevatedButton(
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
               onPressed: onTap,

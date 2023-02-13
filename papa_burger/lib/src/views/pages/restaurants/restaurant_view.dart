@@ -5,10 +5,8 @@ import 'package:papa_burger/src/restaurant.dart';
 class RestaurantView extends StatelessWidget {
   const RestaurantView({
     Key? key,
-    required this.userRepository,
   }) : super(key: key);
 
-  final UserRepository userRepository;
 
   @override
   Widget build(BuildContext context) {
