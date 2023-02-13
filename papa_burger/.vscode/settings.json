@@ -1,0 +1,14 @@
+{
+    "[dart]": {
+    "editor.codeActionsOnSave": {
+        "quickfix.add.required": true,
+        "quickfix.add.required.multi": true,
+        "quickfix.create.constructorForFinalFields": true,
+        "quickfix.create.constructorForFinalFields.multi": true,
+        "quickfix.remove.thisExpression": true,
+        "quickfix.remove.thisExpression.multi": true,
+    },
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    }
+}
