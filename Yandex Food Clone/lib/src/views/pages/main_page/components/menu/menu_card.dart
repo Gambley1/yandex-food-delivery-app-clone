@@ -3,27 +3,41 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:papa_burger/src/restaurant.dart';
-import 'package:papa_burger/src/views/pages/cart/state/cart.state.dart';
 
-class MenuCard extends StatelessWidget {
+class MenuCard extends StatefulWidget {
   const MenuCard({
     super.key,
-    required this.state,
     required this.menuModel,
     required this.menu,
     required this.i,
   });
 
-  final CartState state;
   final MenuModel menuModel;
   final Menu menu;
   final int i;
 
+  @override
+  State<MenuCard> createState() => _MenuCardState();
+}
+
+class _MenuCardState extends State<MenuCard> {
+  late final CartBloc _bloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _bloc = CartBloc();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   _showCustomToClearItemsFromCart(BuildContext context, Item menuItems) {
     addItemToCartAfterRemovingAll() {
-      context
-          .read<CartCubit>()
-          .addItemToCartAfterRemovingAll(menuItems, menuModel.restaurant);
+      context.read<CartCubit>().addItemToCartAfterRemovingAll(
+          menuItems, widget.menuModel.restaurantId);
     }
 
     return showDialog(
@@ -85,24 +99,14 @@ class MenuCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    void addToCart(Item item, Restaurant restaurant) {
-      context.read<CartCubit>().addItemToCart(item, restaurant);
-      context.read<CartCubit>().addRestaurantIdInCart(restaurant);
-    }
+    // void addToCart(Item item, Restaurant restaurant) {
+    //   context.read<CartCubit>().addItemToCart(item, restaurant);
+    //   context.read<CartCubit>().addRestaurantIdInCart(restaurant);
+    // }
 
-    void addToCartTest(Item item, Restaurant restaurant) {
-      CartStateT(localStorageRepository: LocalStorageRepository())
-          .addToCart(cartItem: item, restaurant: restaurant);
-    }
-
-    void removeFromCart(Item item, Restaurant restaurant) {
-      context.read<CartCubit>().removeItemFromCart(item, restaurant);
-    }
-
-    void removeFromCartTest(Item item, Restaurant restaurant) {
-      CartStateT(localStorageRepository: LocalStorageRepository())
-          .removeFromCart(cartItem: item, restaurant: restaurant);
-    }
+    // void removeFromCart(Item item, Restaurant restaurant) {
+    //   context.read<CartCubit>().removeItemFromCart(item, restaurant);
+    // }
 
     final restaurantIdInCart =
         context.select<CartCubit, int>((b) => b.state.restaurantId);
@@ -118,165 +122,138 @@ class MenuCard extends StatelessWidget {
         ),
         delegate: SliverChildBuilderDelegate(
           (context, index) {
-            final loadingState =
-                CartStateT(localStorageRepository: LocalStorageRepository())
-                        .state
-                        .cartStatus ==
-                    CartStatus.loading;
-            final menuItems = menu.items[index];
-            final inCart =
-                CartStateT(localStorageRepository: LocalStorageRepository())
-                    .state
-                    .cartModel
-                    .cartItems
-                    .contains(menuItems);
+            final menuItems = widget.menu.items[index];
+            final name = menuItems.name;
+            final price = menuItems.priceString;
+            final description = menuItems.description;
 
+            final inCart =
+                _bloc.cachedCartItems.contains(menuItems) &&
+                    restaurantIdInCart == widget.menuModel.restaurant.id;
             final hasDiscount = menuItems.price != 0;
 
-            final menuPriceTotal = menuModel.priceOfItem(i: i, index: index);
-            final menuPriceString = menuPriceTotal.toString();
+            final priceTotal =
+                widget.menuModel.priceOfItem(i: widget.i, index: index);
+            final discountPrice = '$priceTotal\$';
 
-            return GestureDetector(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(
-                    22,
-                  ),
+            return Ink(
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(
+                  22,
                 ),
+              ),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(kDefaultBorderRadius),
+                onTap: () {},
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
-                  child: Stack(
+                  padding: const EdgeInsets.fromLTRB(6, 6, 6, 0),
+                  child: Column(
                     children: [
+                      CachedImage(
+                        inkEffect: InkEffect.withEffect,
+                        imageUrl: menuItems.imageUrl,
+                        radius: 22,
+                        top: 25,
+                        left: 40,
+                        sizeSimpleIcon: 42,
+                        sizeXMark: 22,
+                        height: MediaQuery.of(context).size.height * 0.17,
+                        width: double.infinity,
+                        imageType: CacheImageType.smallImage,
+                      ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CachedImage(
-                            imageUrl: menuItems.imageUrl,
-                            radius: 22,
-                            top: 25,
-                            left: 40,
-                            sizeSimpleIcon: 42,
-                            sizeXMark: 22,
-                            height: MediaQuery.of(context).size.height * 0.17,
-                            width: double.infinity,
-                            imageType: CacheImageType.smallImage,
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              hasDiscount
-                                  ? Stack(
-                                      children: [
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            KText(
-                                              text: 'not ${menuItems.price}',
-                                              size: 18,
-                                              color: Colors.black54,
-                                            ),
-                                            KText(
-                                              text: menuPriceString,
-                                              size: 20,
-                                            )
-                                          ],
-                                        )
-                                      ],
-                                    )
-                                  : KText(
-                                      text: menuItems.getMenusItemsPriceString,
-                                    ),
-                              KText(
-                                text: menuItems.name,
-                                size: 20,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              KText(
-                                text: menuItems.description,
-                                color: Colors.grey.shade600,
-                              ),
-                            ],
-                          ),
-                          const Spacer(),
-                          !loadingState
-                              ? ElevatedButton(
-                                  onPressed: () {
-                                    HapticFeedback.heavyImpact();
-
-                                    // if (restaurantIdInCart ==
-                                    //         menuModel.restaurant.id ||
-                                    //     restaurantIdInCart == 0) {
-                                    //   !inCart
-                                    //       ? addToCart(menuItems,
-                                    //           menuModel.restaurant)
-                                    //       : removeFromCart(menuItems,
-                                    //           menuModel.restaurant);
-                                    // } else {
-                                    //   _showCustomToClearItemsFromCart(
-                                    //       context, menuItems);
-                                    // }
-                                    if (restaurantIdInCart ==
-                                            menuModel.restaurant.id ||
-                                        restaurantIdInCart == 0) {
-                                      if (inCart) {
-                                        removeFromCartTest(
-                                            menuItems, menuModel.restaurant);
-                                      } else {
-                                        addToCartTest(
-                                            menuItems, menuModel.restaurant);
-                                      }
-                                    } else {
-                                      _showCustomToClearItemsFromCart(
-                                          context, menuItems);
-                                    }
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    elevation: 1,
-                                    backgroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                        22,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      CustomIcon(
-                                        icon: !inCart
-                                            ? FontAwesomeIcons.plus
-                                            : FontAwesomeIcons.minus,
-                                        type: IconType.simpleIcon,
-                                        size: 18,
-                                        color: Colors.black,
-                                      ),
-                                      SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.02,
-                                      ),
-                                      KText(
-                                        text: !inCart ? 'Add' : 'Remove',
-                                        size: 18,
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              : ExpandedElevatedButton.inProgress(
-                                  label: '',
+                          hasDiscount
+                              ? DiscountPrice(
+                                  defaultPrice: price,
+                                  discountPrice: discountPrice)
+                              : KText(
+                                  text: price,
                                 ),
+                          KText(
+                            text: name,
+                            size: 20,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          KText(
+                            text: description,
+                            color: Colors.grey.shade600,
+                          ),
                         ],
                       ),
+                      const Spacer(),
+                           ElevatedButton(
+                              onPressed: () {
+                                HapticFeedback.heavyImpact();
+                                _bloc.addToCart(menuItems, widget.menuModel.restaurantId);
+                                logger.i('tapped');
+                                // if (restaurantIdInCart ==
+                                //         menuModel.restaurant.id ||
+                                //     restaurantIdInCart == 0) {
+                                //   !inCart
+                                //       ? addToCart(menuItems,
+                                //           menuModel.restaurant)
+                                //       : removeFromCart(menuItems,
+                                //           menuModel.restaurant);
+                                // } else {
+                                //   _showCustomToClearItemsFromCart(
+                                //       context, menuItems);
+                                // }
+                                // if (restaurantIdInCart ==
+                                //         menuModel.restaurant.id ||
+                                //     restaurantIdInCart == 0) {
+                                //   if (inCart) {
+                                //     removeFromCartTest(
+                                //         menuItems, menuModel.restaurant);
+                                //   } else {
+                                //     addToCartTest(
+                                //         menuItems, menuModel.restaurant);
+                                //   }
+                                // } else {
+                                //   _showCustomToClearItemsFromCart(
+                                //       context, menuItems);
+                                // }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                elevation: 1,
+                                backgroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    22,
+                                  ),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CustomIcon(
+                                    icon: !inCart
+                                        ? FontAwesomeIcons.plus
+                                        : FontAwesomeIcons.minus,
+                                    type: IconType.simpleIcon,
+                                    size: 18,
+                                    color: Colors.black,
+                                  ),
+                                  SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.02,
+                                  ),
+                                  KText(
+                                    text: !inCart ? 'Add' : 'Remove',
+                                    size: 18,
+                                  ),
+                                ],
+                              ),
+                            ),
                     ],
                   ),
                 ),
               ),
             );
           },
-          childCount: menu.items.length,
+          childCount: widget.menu.items.length,
         ),
       ),
     );

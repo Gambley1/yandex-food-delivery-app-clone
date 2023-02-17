@@ -1,73 +1,86 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:papa_burger/src/restaurant.dart';
-import 'package:papa_burger/src/views/pages/cart/state/cart.state.dart';
 
-class CartView extends StatelessWidget {
+class CartView extends StatefulWidget {
   const CartView({
     Key? key,
   }) : super(key: key);
 
-  _divider() => const SliverPadding(
-        padding: EdgeInsets.symmetric(horizontal: kDefaultHorizontalPadding),
-        sliver: SliverToBoxAdapter(
-          child: Divider(
-            height: 1,
-            thickness: 1,
-          ),
-        ),
-      );
+  @override
+  State<CartView> createState() => _CartViewState();
+}
+
+class _CartViewState extends State<CartView> {
+  late final CartBloc _bloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _bloc = CartBloc();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   _appBar(BuildContext context) {
     final cartProducts = context.select<CartCubit, List<Item>>(
       (b) => b.state.cartModel.cartItems.toList(),
     );
 
-    final restaurant = context
-        .select<CartCubit, Restaurant>((b) => b.state.cartModel.cartRestaurant);
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: kDefaultHorizontalPadding - 12,
-          vertical: kDefaultHorizontalPadding,
-        ),
-        child: Row(
-          children: [
-            CustomIcon(
-              icon: FontAwesomeIcons.arrowLeft,
-              type: IconType.iconButton,
-              onPressed: () {
-                // navigationCubit.navigation(0);
-                // Navigator.pop(context);
-                Navigator.of(context).pushReplacement(
-                  PageTransition(
-                    child: RestaurantMenusView(restaurant: restaurant),
-                    type: PageTransitionType.fade,
-                  ),
-                );
-              },
-            ),
-            const KText(
-              text: 'Your cart',
-              size: 26,
-            ),
-            const Spacer(),
-            cartProducts.isNotEmpty
-                ? CustomIcon(
-                    type: IconType.iconButton,
-                    onPressed: () {
-                      _showCustomDialogToDeleteAllitems(context);
-                    },
-                    icon: FontAwesomeIcons.trash,
-                    size: 21,
-                  )
-                : Container(),
-          ],
-        ),
+    final restaurantId =
+        context.select<CartCubit, int>((b) => b.state.cartModel.restaurantId);
+    final restaurant = _bloc.getRestaurantById(restaurantId);
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: kDefaultHorizontalPadding - 12,
+        vertical: kDefaultHorizontalPadding,
+      ),
+      child: Row(
+        children: [
+          CustomIcon(
+            icon: FontAwesomeIcons.arrowLeft,
+            type: IconType.iconButton,
+            onPressed: () {
+              // navigationCubit.navigation(0);
+              // Navigator.pop(context);
+              Navigator.of(context).pushReplacement(
+                PageTransition(
+                  child: RestaurantMenusView(restaurant: restaurant),
+                  type: PageTransitionType.fade,
+                ),
+              );
+            },
+          ),
+          const KText(
+            text: 'Your cart',
+            size: 26,
+          ),
+          const Spacer(),
+          // cartProducts.isNotEmpty
+          //     ? CustomIcon(
+          //         type: IconType.iconButton,
+          //         onPressed: () {
+          //           _showCustomDialogToDeleteAllitems(context);
+          //         },
+          //         icon: FontAwesomeIcons.trash,
+          //         size: 21,
+          //       )
+          //     : Container(),
+          CustomIcon(
+            type: IconType.iconButton,
+            onPressed: () {
+              _showCustomDialogToDeleteAllitems(context);
+            },
+            icon: FontAwesomeIcons.trash,
+            size: 21,
+          ),
+        ],
       ),
     );
   }
@@ -92,6 +105,7 @@ class CartView extends StatelessWidget {
               child: Row(
                 children: [
                   CachedImage(
+                    inkEffect: InkEffect.noEffect,
                     imageType: CacheImageType.smallImage,
                     height: 100,
                     width: 100,
@@ -112,7 +126,7 @@ class CartView extends StatelessWidget {
                         height: 5,
                       ),
                       KText(
-                        text: cartProducts[index].getMenusItemsPriceString,
+                        text: cartProducts[index].priceString,
                         maxLines: 1,
                         textOverflow: TextOverflow.ellipsis,
                       ),
@@ -226,8 +240,11 @@ class CartView extends StatelessWidget {
   }
 
   _showCustomDialogToDeleteAllitems(BuildContext context) {
-    removeAllFromCart() async {
-      context.read<CartCubit>().removeAllItemFromCart();
+    // removeAllFromCart() {
+    //   context.read<CartCubit>().removeAllItemFromCart();
+    // }
+    removeAllFromCart() {
+      _bloc.removeItemsFromCart();
     }
 
     return showDialog(
@@ -290,177 +307,81 @@ class CartView extends StatelessWidget {
     );
   }
 
-  // _buildUi(BuildContext context) {
-  //   final cartIsEmpty = context
-  //       .select<CartCubit, bool>((b) => b.state.cartModel.cartItems.isEmpty);
-  //   final navigationCubit = context.read<NavigationCubit>();
-
-  //   return Scaffold(
-  //     body: SafeArea(
-  //       child: BlocBuilder<CartCubit, CartState>(
-  //         builder: (context, state) {
-  //           return CustomScrollView(
-  //             slivers: [
-  //               _appBar(context),
-  //               !cartIsEmpty
-  //                   ? _cartListView(context, state)
-  //                   : SliverToBoxAdapter(
-  //                       child: Column(
-  //                         children: [
-  //                           const SizedBox(
-  //                             height: 200,
-  //                           ),
-  //                           const KText(
-  //                             text: 'Cart is Empty',
-  //                             size: 22,
-  //                             fontWeight: FontWeight.bold,
-  //                           ),
-  //                           SizedBox(
-  //                             height: MediaQuery.of(context).size.width * 0.02,
-  //                           ),
-  //                           OutlinedButton(
-  //                             onPressed: () {
-  //                               navigationCubit.navigation(0);
-  //                               Navigator.pop(context);
-  //                             },
-  //                             child: const KText(
-  //                               text: 'Explore',
-  //                             ),
-  //                           ),
-  //                           SizedBox(
-  //                             height: MediaQuery.of(context).size.height * 0.1,
-  //                           ),
-  //                         ],
-  //                       ),
-  //                     ),
-  //               _divider(),
-  //               _buildOptionalAddMoreItems(context, state),
-  //               // _buildTotal(state),
-
-  //               // !cartIsEmpty
-  //               //     ? Padding(
-  //               //         padding: const EdgeInsets.symmetric(
-  //               //             horizontal: kDefaultHorizontalPadding,
-  //               //             vertical: kDefaultHorizontalPadding),
-  //               //         child: Container(
-  //               //           decoration: const BoxDecoration(color: Colors.white),
-  //               //           child: Column(
-  //               //             mainAxisSize: MainAxisSize.min,
-  //               //             children: [
-  //               //               Row(
-  //               //                 children: [
-  //               //                   Column(
-  //               //                     crossAxisAlignment: CrossAxisAlignment.start,
-  //               //                     mainAxisSize: MainAxisSize.min,
-  //               //                     children: const [
-  //               //                       KText(
-  //               //                         text: '52\$',
-  //               //                         size: 24,
-  //               //                       ),
-  //               //                       KText(
-  //               //                         text: '40-50 min',
-  //               //                       ),
-  //               //                     ],
-  //               //                   ),
-  //               //                   SizedBox(
-  //               //                     width: MediaQuery.of(context).size.width * 0.1,
-  //               //                   ),
-  //               //                   Expanded(
-  //               //                     child: ElevatedButton(
-  //               //                       onPressed: () {},
-  //               //                       child: const KText(
-  //               //                         text: 'Confirm',
-  //               //                         color: Colors.white,
-  //               //                         size: 24,
-  //               //                       ),
-  //               //                     ),
-  //               //                   ),
-  //               //                 ],
-  //               //               ),
-  //               //             ],
-  //               //           ),
-  //               //         ),
-  //               //       )
-  //               //     : Container(),
-  //             ],
-  //           );
-  //         },
-  //       ),
-  //     ),
-  //   );
-  // }
-
   _buildUi(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: StreamBuilder<CartState>(
-          initialData: const CartState(),
-          stream: CartStateT(localStorageRepository: LocalStorageRepository())
-              .cartStream,
-          builder: (context, snapshot) {
-            final data = snapshot.data;
-            final active = snapshot.connectionState == ConnectionState.active;
-            final done = snapshot.connectionState == ConnectionState.done;
-            final waiting = snapshot.connectionState == ConnectionState.waiting;
-            final none = snapshot.connectionState == ConnectionState.none;
-            return CustomScrollView(
-              slivers: [
-                _appBar(context),
-                active
-                    ? SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final items = data?.cartModel.cartItems.toList();
-                            final item = items?[index];
-                            return Column(
-                              children: [
-                                KText(
-                                  text: item!.name,
-                                ),
-                              ],
-                            );
-                          },
-                        ),
+        child: Column(
+          children: [
+            _appBar(context),
+            StreamBuilder<Set<Item>>(
+              stream: _bloc.getItems,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final items = snapshot.requireData;
+                  // if (cart is CartItemsHasError) {
+                  //   return KText(text: cart.error.toString());
+                  // } else if (cart is CartItemsLoading) {
+                  //   return const CustomCircularIndicator(color: Colors.black);
+                  // } else if (cart is CartItemsNoItems) {
+                  //   return const KText(text: 'No items in cart!');
+                  // } else if (cart is CartItemsWithItems) {
+                  //   return Expanded(
+                  //     child: ListView.builder(
+                  //       itemBuilder: (context, index) {
+                  //         final items = cart.cart.cartItems.toList();
+                  //         final item = items[index];
+                  //         final name = item.name;
+                  //         final imageUrl = item.imageUrl;
+                  //         final price = item.getMenusItemsPriceString;
+                  //         return ListTile(
+                  //           title: KText(text: name),
+                  //           subtitle: KText(text: price),
+                  //           trailing: CachedImage(
+                  //               imageType: CacheImageType.smallImage,
+                  //               imageUrl: imageUrl),
+                  //         );
+                  //       },
+                  //       itemCount: cart.cart.cartItems.length,
+                  //     ),
+                  //   );
+                  // }
+                  //  else {
+                  //   return KText(text: 'Unhandled state');
+                  // }
+                  return Expanded(
+                    child: ListView.builder(
+                      itemBuilder: (context, index) {
+                        final item = items.toList()[index];
+                        return ListTile(
+                          title: KText(
+                            text: item.name,
+                          ),
+                          subtitle: KText(
+                            text: item.priceString,
+                          ),
+                        );
+                      },
+                      itemCount: items.length,
+                    ),
+                  );
+                } else {
+                  return Column(
+                    children: [
+                      const KText(text: 'Loading'),
+                      CustomIcon(
+                        type: IconType.iconButton,
+                        onPressed: () {
+                          _showCustomDialogToDeleteAllitems(context);
+                        },
+                        icon: FontAwesomeIcons.trash,
+                        size: 21,
                       )
-                    : done
-                        ? const SliverToBoxAdapter(
-                            child: Center(
-                              child: KText(
-                                text: 'Done',
-                              ),
-                            ),
-                          )
-                        : waiting
-                            ? SliverToBoxAdapter(
-                                child: Column(
-                                  children: const [
-                                    SizedBox(
-                                      height: 80,
-                                    ),
-                                    CustomCircularIndicator(
-                                      color: Colors.black,
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : none
-                                ? const SliverToBoxAdapter(
-                                    child: Center(
-                                      child: KText(
-                                        text: 'None',
-                                      ),
-                                    ),
-                                  )
-                                : const SliverToBoxAdapter(
-                                    child: Center(
-                                      child: KText(
-                                        text: 'Non handled state',
-                                      ),
-                                    ),
-                                  ),
-              ],
-            );
-          },
+                    ],
+                  );
+                }
+              },
+            ),
+          ],
         ),
       ),
     );

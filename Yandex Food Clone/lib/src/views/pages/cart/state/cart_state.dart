@@ -12,18 +12,18 @@ class CartState extends Equatable {
   const CartState({
     this.restaurantId = 0,
     this.numOfMeals = 1,
-    this.cartModel = const Cart(),
+    this.cartModel = const CartModel(),
     this.cartStatus = CartStatus.init,
   });
   final int numOfMeals;
   final int restaurantId;
-  final Cart cartModel;
+  final CartModel cartModel;
   final CartStatus cartStatus;
 
   CartState copyWith({
     int? numOfMeals,
     int? restaurantId,
-    Cart? cartModel,
+    CartModel? cartModel,
     CartStatus? cartStatus,
   }) {
     return CartState(

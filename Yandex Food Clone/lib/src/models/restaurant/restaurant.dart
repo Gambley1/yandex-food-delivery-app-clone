@@ -1,11 +1,13 @@
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart' show immutable;
 import 'package:hive/hive.dart';
 import 'package:papa_burger/src/restaurant.dart';
 
 part 'restaurant.g.dart';
 
+@immutable
 @HiveType(typeId: 1)
 class Restaurant extends Equatable {
   @HiveField(5)
@@ -36,17 +38,6 @@ class Restaurant extends Equatable {
     required this.menu,
   });
 
-  Restaurant empty() => const Restaurant(
-        name: '',
-        quality: '',
-        imageUrl: '',
-        id: 0,
-        numOfRatings: 0,
-        rating: 0,
-        tags: [],
-        menu: [],
-      );
-
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
@@ -61,6 +52,16 @@ class Restaurant extends Equatable {
   }
 
   String toJson() => json.encode(toMap());
+
+  const Restaurant.empty()
+      : id = 0,
+        imageUrl = '',
+        name = '',
+        quality = '',
+        rating = 0,
+        numOfRatings = 0,
+        tags = const [],
+        menu = const [];
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
     return Restaurant(
@@ -86,6 +87,13 @@ class Restaurant extends Equatable {
           : [],
     );
   }
+
+  String get qualityAndNumOfRatings => '$quality ($numOfRatings+) ';
+
+  List<String> get tagsName => tags.map((e) => e.name).toList();
+
+  String get tagsToString => '${tagsName.first}, ${tagsName.last}';
+
   @override
   List<Object?> get props => <Object?>[
         name,

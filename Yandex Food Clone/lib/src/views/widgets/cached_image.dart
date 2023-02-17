@@ -10,10 +10,17 @@ enum CacheImageType {
   smallImage,
 }
 
+enum InkEffect {
+  withEffect,
+  noEffect,
+}
+
 class CachedImage extends StatelessWidget {
   const CachedImage({
     super.key,
     required this.imageUrl,
+    required this.imageType,
+    required this.inkEffect,
     this.width = 100,
     this.height = 100,
     this.bottom = 0,
@@ -23,7 +30,6 @@ class CachedImage extends StatelessWidget {
     this.radius = kDefaultBorderRadius,
     this.sizeXMark = 18,
     this.sizeSimpleIcon = 32,
-    required this.imageType,
   });
 
   final String imageUrl;
@@ -37,6 +43,7 @@ class CachedImage extends StatelessWidget {
       sizeSimpleIcon,
       radius;
   final CacheImageType imageType;
+  final InkEffect inkEffect;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +58,17 @@ class CachedImage extends StatelessWidget {
                 ),
               ),
             ),
-            imageBuilder: (context, imageProvider) => Container(
+            imageBuilder: (context, imageProvider) => inkEffect == InkEffect.noEffect ? Container(
+              height: height,
+              width: width,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(kDefaultBorderRadius),
+                image: DecorationImage(
+                  image: imageProvider,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ) : Ink(
               height: height,
               width: width,
               decoration: BoxDecoration(
@@ -62,19 +79,6 @@ class CachedImage extends StatelessWidget {
                 ),
               ),
             ),
-            // placeholder: (context, url) => Container(
-            //   height: height,
-            //   width: width,
-            //   decoration: BoxDecoration(
-            //     borderRadius: BorderRadius.circular(16),
-            //     image: const DecorationImage(
-            //       image: AssetImage(
-            //         'assets/images/PlaceHolderImage.jpg',
-            //       ),
-            //       fit: BoxFit.cover,
-            //     ),
-            //   ),
-            // ),
             placeholder: (context, url) => ShimmerLoading(
               radius: kDefaultBorderRadius,
               width: width,
@@ -137,16 +141,6 @@ class CachedImage extends StatelessWidget {
                 ),
               ),
             ),
-            // placeholder: (context, url) => Container(
-            //   decoration: const BoxDecoration(
-            //     image: DecorationImage(
-            //       image: AssetImage(
-            //         'assets/images/PlaceHolderImage.jpg',
-            //       ),
-            //       fit: BoxFit.cover,
-            //     ),
-            //   ),
-            // ),
             placeholder: (context, url) => const ShimmerLoading(),
             placeholderFadeInDuration: const Duration(seconds: 2),
             errorWidget: (context, url, error) {

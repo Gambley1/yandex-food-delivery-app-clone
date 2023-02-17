@@ -11,7 +11,7 @@ class RestaurantRepository implements BaseRestaurantRepository {
   @override
   Future<void> getListRestaurants(Map<String, dynamic> json) async {
     try {
-      final restaurants = await api.getListRestaurants(json);
+      final restaurants = await api.getListRestaurants();
       logger.i(restaurants);
     } catch (e) {
       logger.e(e.toString(), 'restaurant error');

@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:formz/formz.dart';
+import 'package:flutter/foundation.dart' show immutable;
 
+@immutable
 class Username extends FormzInput<String, UsernameValidationError>
     with EquatableMixin {
   const Username.unvalidated([

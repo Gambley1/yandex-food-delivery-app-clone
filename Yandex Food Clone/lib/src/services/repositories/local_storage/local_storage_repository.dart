@@ -3,7 +3,7 @@ import 'package:papa_burger/src/restaurant.dart';
 
 class LocalStorageRepository with BaseLocalStorageRepository {
   static const String cart = 'cart_items';
-  static const String restaurantId = 'restaurant_id';
+  static const String restaurant = 'restaurant_id';
 
   @override
   Future<Box> openBoxCart() async {
@@ -13,7 +13,7 @@ class LocalStorageRepository with BaseLocalStorageRepository {
 
   @override
   Future<Box> openBoxRestaurantId() async {
-    Box box = await Hive.openBox<Restaurant>(restaurantId);
+    Box box = await Hive.openBox<int>(restaurant);
     return box;
   }
 
@@ -23,8 +23,8 @@ class LocalStorageRepository with BaseLocalStorageRepository {
   }
 
   @override
-  Future<void> addRestaurantIdToCart(Box box, Restaurant restaurant) async {
-    await box.put(restaurant.name, restaurant);
+  Future<void> addRestaurantIdToCart(Box box, int restaurantId) async {
+    await box.put(restaurantId, restaurantId);
   }
 
   @override
@@ -35,8 +35,9 @@ class LocalStorageRepository with BaseLocalStorageRepository {
   @override
   Stream<int> getRestaurantIdFromStorage(Box box) async* {
     logger.i('stream emitted');
-    if (box.values.isEmpty) yield 1;
-    yield 2;
+    final abc = box.values.expand((element) => element).toList();
+    if (box.values.isEmpty) yield 0;
+    yield abc as int;
   }
 
   @override
@@ -50,8 +51,12 @@ class LocalStorageRepository with BaseLocalStorageRepository {
   }
 
   @override
-  Future<void> removeRestaurantIdFromCart(
-      Box box, Restaurant restaurant) async {
-    await box.delete(restaurant.name);
+  Future<void> removeRestaurantIdFromCart(Box box, int restaurantId) async {
+    await box.delete(restaurantId);
+  }
+  
+  @override
+  Future<void> removeAllIdsFromCart(Box box) async {
+    await box.clear();
   }
 }

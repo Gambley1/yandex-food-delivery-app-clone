@@ -20,7 +20,6 @@ class CartCubit extends Cubit<CartState> {
     Box boxCart = await _localStorageRepository.openBoxCart();
     Box boxRestaurantId = await _localStorageRepository.openBoxRestaurantId();
     Set<Item> cartItems = _localStorageRepository.getItemsFromStorage(boxCart);
-    
 
     _streamRestaurantId = _localStorageRepository
         .getRestaurantIdFromStorage(boxRestaurantId)
@@ -34,7 +33,7 @@ class CartCubit extends Cubit<CartState> {
       try {
         final initState = state.copyWith(
           restaurantId: 0,
-          cartModel: Cart(
+          cartModel: CartModel(
             cartItems: cartItems,
           ),
         );
@@ -45,15 +44,10 @@ class CartCubit extends Cubit<CartState> {
     }
   }
 
-  Future<void> addRestaurantIdInCart(Restaurant restaurant) async {
+  Future<void> addRestaurantIdInCart(int restaurantId) async {
     try {
-      Box boxRestaurantId = await _localStorageRepository.openBoxRestaurantId();
-      _localStorageRepository.addRestaurantIdToCart(
-        boxRestaurantId,
-        restaurant,
-      );
       _streamSubscription =
-          Cart(restaurant: restaurant).updateRestaurantCartId().listen(
+          CartModel(restaurantId: restaurantId).updateRestaurantCartId().listen(
                 (id) => emit(
                   state.copyWith(restaurantId: id),
                 ),
@@ -63,17 +57,14 @@ class CartCubit extends Cubit<CartState> {
     }
   }
 
-  Future<void> addItemToCart(Item item, Restaurant restaurant) async {
+  Future<void> addItemToCart(Item item, int restaurantId ) async {
     loading();
     try {
       Box boxCart = await _localStorageRepository.openBoxCart();
-      Box boxRestaurantId = await _localStorageRepository.openBoxRestaurantId();
 
       _localStorageRepository.addItemToCart(boxCart, item);
-      _localStorageRepository.addRestaurantIdToCart(
-          boxRestaurantId, restaurant);
       _streamSubscription =
-          Cart(restaurant: restaurant).updateRestaurantCartId().listen(
+          CartModel(restaurantId: restaurantId).updateRestaurantCartId().listen(
                 (id) => emit(
                   state.copyWith(restaurantId: id),
                 ),
@@ -85,23 +76,21 @@ class CartCubit extends Cubit<CartState> {
       );
 
       final addItemState = state.copyWith(
-        cartModel: Cart(restaurant: restaurant).copyWith(
-          restaurant: restaurant,
+        cartModel: CartModel(restaurantId: restaurantId).copyWith(
+          restaurantId: restaurantId,
           cartItems: {...state.cartModel.cartItems}..add(item),
         ),
         cartStatus: CartStatus.loaded,
       );
 
       emit(addItemState);
-
-      logger.i(state.restaurantId);
     } catch (e) {
       error();
     }
   }
 
   Future<void> addItemToCartAfterRemovingAll(
-      Item item, Restaurant restaurant) async {
+      Item item,  int restaurantId) async {
     loading();
     try {
       Box boxCart = await _localStorageRepository.openBoxCart();
@@ -109,12 +98,10 @@ class CartCubit extends Cubit<CartState> {
 
       _localStorageRepository.removeAllItemsFromCart(boxCart);
       _localStorageRepository.removeRestaurantIdFromCart(
-          boxRestaurantId, restaurant);
+          boxRestaurantId, restaurantId);
       _localStorageRepository.addItemToCart(boxCart, item);
-      _localStorageRepository.addRestaurantIdToCart(
-          boxRestaurantId, restaurant);
       _streamSubscription =
-          Cart(restaurant: restaurant).updateRestaurantCartId().listen(
+          CartModel(restaurantId: restaurantId).updateRestaurantCartId().listen(
                 (id) => emit(
                   state.copyWith(restaurantId: id),
                 ),
@@ -125,7 +112,7 @@ class CartCubit extends Cubit<CartState> {
 
       emit(
         state.copyWith(
-          cartModel: Cart(
+          cartModel: CartModel(
             cartItems: {...state.cartModel.cartItems}
               ..removeAll(state.cartModel.cartItems),
           ),
@@ -138,22 +125,19 @@ class CartCubit extends Cubit<CartState> {
 
       emit(
         state.copyWith(
-          cartModel: Cart(
-            restaurant: restaurant,
+          cartModel: CartModel(
+            restaurantId: restaurantId,
             cartItems: {...state.cartModel.cartItems}..add(item),
           ),
           cartStatus: CartStatus.loaded,
         ),
       );
-
-      logger.i(state.cartModel.cartItems);
-      logger.i(state.cartModel.restaurant.id);
     } catch (e) {
       error();
     }
   }
 
-  Future<void> removeItemFromCart(Item item, Restaurant restaurant) async {
+  Future<void> removeItemFromCart(Item item, int restaurantId) async {
     loading();
     try {
       Box boxCart = await _localStorageRepository.openBoxCart();
@@ -161,9 +145,9 @@ class CartCubit extends Cubit<CartState> {
 
       _localStorageRepository.removeItemFromCart(boxCart, item);
       _localStorageRepository.removeRestaurantIdFromCart(
-          boxRestaurantId, restaurant);
+          boxRestaurantId, restaurantId);
       _streamSubscription =
-          Cart(restaurant: restaurant).updateRestaurantCartId().listen(
+          CartModel(restaurantId: restaurantId).updateRestaurantCartId().listen(
                 (id) => emit(
                   state.copyWith(restaurantId: id),
                 ),
@@ -172,8 +156,8 @@ class CartCubit extends Cubit<CartState> {
         const Duration(milliseconds: 500),
       );
       final removeItemState = state.copyWith(
-        cartModel: Cart(
-          restaurant: restaurant,
+        cartModel: CartModel(
+          restaurantId: restaurantId,
           cartItems: {
             ...state.cartModel.cartItems,
           }..remove(item),
@@ -195,7 +179,7 @@ class CartCubit extends Cubit<CartState> {
       Box boxCart = await _localStorageRepository.openBoxCart();
 
       _localStorageRepository.removeAllItemsFromCart(boxCart);
-      _streamSubscription = Cart(restaurant: state.cartModel.restaurant)
+      _streamSubscription = CartModel(restaurantId: state.cartModel.restaurantId)
           .updateRestaurantCartId()
           .listen(
             (id) => emit(
@@ -204,17 +188,8 @@ class CartCubit extends Cubit<CartState> {
           );
       await delay1Sec();
       final removeAllState = state.copyWith(
-        cartModel: Cart(
-          restaurant: const Restaurant(
-            name: '',
-            quality: '',
-            imageUrl: '',
-            id: 0,
-            numOfRatings: 0,
-            rating: 0,
-            tags: [],
-            menu: [],
-          ),
+        cartModel: CartModel(
+          restaurantId: 0,
           cartItems: {...state.cartModel.cartItems}
             ..removeAll(state.cartModel.cartItems),
         ),

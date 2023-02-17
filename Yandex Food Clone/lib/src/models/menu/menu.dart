@@ -1,15 +1,18 @@
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:flutter/foundation.dart' show immutable;
 
 part 'menu.g.dart';
 
+@immutable
 class Menu {
   final String categorie;
   final List<Item> items;
 
-  Menu({
+  const Menu({
     required this.categorie,
     required this.items,
   });
@@ -35,6 +38,7 @@ class Menu {
   }
 }
 
+@immutable
 @HiveType(typeId: 0)
 class Item extends Equatable {
   @HiveField(0)
@@ -77,7 +81,9 @@ class Item extends Equatable {
     );
   }
 
-  String get getMenusItemsPriceString => '${price.toStringAsFixed(2)}\$';
+  int get priceFloor => price.floor();
+
+  String get priceString => '$priceFloor\$';
 
   @override
   List<Object?> get props => [

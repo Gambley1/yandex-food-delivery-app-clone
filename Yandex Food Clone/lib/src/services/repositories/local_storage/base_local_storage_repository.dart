@@ -7,8 +7,9 @@ abstract class BaseLocalStorageRepository {
   Set<Item> getItemsFromStorage(Box box);
   Stream<int> getRestaurantIdFromStorage(Box box);
   Future<void> addItemToCart(Box box, Item cartItem);
-  Future<void> addRestaurantIdToCart(Box box, Restaurant restaurant);
+  Future<void> addRestaurantIdToCart(Box box, int restaurantId);
   Future<void> removeItemFromCart(Box box, Item cartItem);
-  Future<void> removeRestaurantIdFromCart(Box box, Restaurant restaurant);
+  Future<void> removeRestaurantIdFromCart(Box box, int restaurantId);
+  Future<void> removeAllIdsFromCart(Box box);
   Future<void> removeAllItemsFromCart(Box box);
 }

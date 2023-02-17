@@ -1,45 +1,39 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:papa_burger/src/restaurant.dart';
+import 'package:flutter/foundation.dart' show immutable;
 
-class Cart extends Equatable {
+@immutable
+class CartModel extends Equatable {
   final int restaurantId;
-  final Restaurant restaurant;
   final Set<Item> cartItems;
 
-  const Cart({
+  const CartModel({
     this.restaurantId = 0,
-    this.restaurant = const Restaurant(
-      name: '',
-      quality: '',
-      imageUrl: '',
-      id: 0,
-      numOfRatings: 0,
-      rating: 0,
-      tags: [],
-      menu: [],
-    ),
     this.cartItems = const <Item>{},
   });
 
-  Cart copyWith({
-    Restaurant? restaurant,
+  const CartModel.empty()
+      : restaurantId = 0,
+        cartItems = const <Item>{};
+
+  CartModel copyWith({
+    int? restaurantId,
     Set<Item>? cartItems,
   }) =>
-      Cart(
-        restaurant: restaurant ?? this.restaurant,
+      CartModel(
         cartItems: cartItems ?? this.cartItems,
+        restaurantId: restaurantId ?? this.restaurantId,
       );
 
   bool get isCartEmpty =>
       cartItems.isEmpty || cartItems == <Item>{} ? true : false;
 
-  Restaurant get cartRestaurant => restaurant;
-
-  Stream<int?> updateRestaurantCartId() async* {
+  Stream<int> updateRestaurantCartId() async* {
     if (isCartEmpty) {
       yield 0;
     }
-    yield restaurant.id;
+    yield restaurantId;
   }
 
   int get _minimumSubTotal => 30;
@@ -73,7 +67,7 @@ class Cart extends Equatable {
 
   @override
   List<Object?> get props => [
-        restaurant,
+        restaurantId,
         cartItems,
       ];
 }

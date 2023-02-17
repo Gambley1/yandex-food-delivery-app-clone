@@ -1,5 +1,7 @@
 import 'package:formz/formz.dart';
+import 'package:flutter/foundation.dart' show immutable;
 
+@immutable
 class OptionalPassword
     extends FormzInput<String, OptionalPasswordValidationError> {
   const OptionalPassword.unvalidated([

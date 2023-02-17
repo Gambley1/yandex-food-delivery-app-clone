@@ -1,7 +1,9 @@
 import 'package:formz/formz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:papa_burger/src/restaurant.dart';
+import 'package:flutter/foundation.dart' show immutable;
 
+@immutable
 class PasswordConfirmation
     extends FormzInput<String, PasswordConfirmationValidationError>
     with EquatableMixin {

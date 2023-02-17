@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart' show immutable;
 
+@immutable
 class Categorie extends Equatable {
   final String name;
   const Categorie({
@@ -14,6 +16,6 @@ class Categorie extends Equatable {
 
   @override
   List<Object?> get props => <Object?>[
-    name,
-  ];
+        name,
+      ];
 }

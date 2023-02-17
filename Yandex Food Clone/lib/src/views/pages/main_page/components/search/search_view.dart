@@ -1,9 +1,10 @@
-// ignore_for_file: no_leading_underscores_for_local_identifiers
-
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:papa_burger/src/restaurant.dart';
+import 'package:papa_burger/src/services/network/api/search_api.dart';
+import 'package:papa_burger/src/views/pages/main_page/state/search_result.dart';
+
+import '../../state/search_bloc.dart';
 
 class SearchView extends StatefulWidget {
   const SearchView({Key? key}) : super(key: key);
@@ -14,42 +15,21 @@ class SearchView extends StatefulWidget {
 
 class _SearchViewState extends State<SearchView>
     with AutomaticKeepAliveClientMixin<SearchView> {
-  final TextEditingController? searchController = TextEditingController();
+  late final SearchBloc _searchBloc;
 
-  List<Item> filteredItems = [];
-  late int numOfFindResults;
+  @override
+  void initState() {
+    super.initState();
+    _searchBloc = SearchBloc(api: SearchApi());
+  }
 
   @override
   void dispose() {
+    _searchBloc.dispose();
     super.dispose();
-    searchController!.dispose();
   }
 
   _appBar(BuildContext context) {
-    final menuItems = context
-        .select<MainPageBloc, List<Restaurant>>((b) => b.state.restaurants);
-    _runFilter(String inputedKeyword) {
-      late List<Item> results;
-      if (inputedKeyword.isEmpty) {
-        results = [];
-      } else {
-        final menus = menuItems.map((restaurant) => restaurant.menu).toList();
-        final listMenus = menus.expand((menu) => menu).toList();
-        final items = listMenus.map((menu) => menu.items).toList();
-        final listItems = items.expand((item) => item).toList();
-        results = listItems
-            .where((element) => element.name
-                .toLowerCase()
-                .contains(inputedKeyword.toLowerCase()))
-            .toList();
-      }
-
-      setState(() {
-        filteredItems = results;
-        numOfFindResults = results.length;
-      });
-    }
-
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 12, 12),
       child: Row(
@@ -74,91 +54,11 @@ class _SearchViewState extends State<SearchView>
                 focusedBorder: InputBorder.none,
                 borderRadius: 24,
                 labelText: 'Search...',
-                textController: searchController,
-                onChanged: (value) => _runFilter(value),
+                onChanged: _searchBloc.search.add,
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  _foundResults(BuildContext context) {
-    return Expanded(
-      child: filteredItems.isEmpty
-          ? searchController!.text.isEmpty
-              ? Container()
-              : const Center(
-                  child: Text('Nothing found'),
-                )
-          : Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                  ),
-                  child: _numOfFindResults(),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: filteredItems.length,
-                    itemBuilder: (context, index) {
-                      final name = filteredItems[index].name;
-                      final desc = filteredItems[index].description;
-                      final price =
-                          filteredItems[index].getMenusItemsPriceString;
-                      // final imgPathPng =
-                      //     filteredItems[index].imagePathPng.replaceAll(' ', '');
-
-                      return _mealListTile(
-                        name,
-                        desc,
-                        price,
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-    );
-  }
-
-  _numOfFindResults() => KText(
-        size: 16,
-        text: 'Found results: $numOfFindResults',
-      );
-
-  _mealListTile(String name, String desc, String price) {
-    return InkWell(
-      onTap: () {
-        // Navigator.of(context).pushAndRemoveUntil(
-        //     PageTransition(
-        //       child: RestaurantMenusView(restaurant: restaurant),
-        //       type: PageTransitionType.fade,
-        //     ),
-        //     (route) => true);
-      },
-      child: ListTile(
-        leading: const CachedImage(
-          imageType: CacheImageType.smallImage,
-          sizeSimpleIcon: 30,
-          left: 20,
-          top: 0,
-          sizeXMark: 16,
-          imageUrl: '',
-        ),
-        title: KText(
-          text: name,
-          size: 22,
-        ),
-        subtitle: KText(text: desc),
-        trailing: KText(
-          text: price,
-          size: 18,
-        ),
       ),
     );
   }
@@ -174,7 +74,57 @@ class _SearchViewState extends State<SearchView>
           child: Column(
             children: [
               _appBar(context),
-              _foundResults(context),
+              StreamBuilder(
+                stream: _searchBloc.results,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final result = snapshot.data;
+                    if (result is SearchResultsError) {
+                      return KText(text: result.error.toString());
+                    } else if (result is SearchResultsLoading) {
+                      return const CustomCircularIndicator(color: Colors.black);
+                    } else if (result is SearchResultsNoResults) {
+                      return const KText(
+                        text: '  Nothing found \n Please try again!',
+                        size: 24,
+                      );
+                    } else if (result is SearchResultsWithResults) {
+                      return Expanded(
+                        child: ListView.builder(
+                          itemBuilder: (context, index) {
+                            final restaurant = result.restaurants[index];
+                            final name = restaurant.name;
+                            final rating = restaurant.rating;
+                            final tags = restaurant.tagsName;
+                            final numOfRatings = restaurant.numOfRatings;
+                            final imageUrl = restaurant.imageUrl;
+                            final quality = restaurant.quality;
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: kDefaultHorizontalPadding,
+                                  vertical: kDefaultHorizontalPadding),
+                              child: RestaurantCard(
+                                restaurant: restaurant,
+                                restaurantImageUrl: imageUrl,
+                                restaurantName: name,
+                                rating: rating,
+                                quality: quality,
+                                numOfRatings: numOfRatings,
+                                tags: tags,
+                              ),
+                            );
+                          },
+                          itemCount: result.restaurants.length,
+                        ),
+                      );
+                    } else {
+                      return const KText(text: 'Unhandled state');
+                    }
+                  } else {
+                    return const KText(text: 'Loading...');
+                  }
+                },
+              ),
             ],
           ),
         ),

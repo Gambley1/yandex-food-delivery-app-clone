@@ -2,13 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class KText extends StatelessWidget {
-  final String text;
-  final double? size, letterSpacing;
-  final Color color;
-  final FontWeight fontWeight;
-  final TextOverflow textOverflow;
-  final TextAlign textAlign;
-  final int maxLines;
   const KText({
     Key? key,
     required this.text,
@@ -19,7 +12,17 @@ class KText extends StatelessWidget {
     this.textAlign = TextAlign.justify,
     this.fontWeight = FontWeight.w500,
     this.maxLines = 2,
+    this.decoration = TextDecoration.none,
   }) : super(key: key);
+
+  final int maxLines;
+  final double? size, letterSpacing;
+  final Color color;
+  final String text;
+  final TextAlign textAlign;
+  final FontWeight fontWeight;
+  final TextOverflow textOverflow;
+  final TextDecoration decoration;
 
   @override
   Widget build(BuildContext context) {
@@ -29,11 +32,11 @@ class KText extends StatelessWidget {
       style: GoogleFonts.getFont(
         'Quicksand',
         textStyle: TextStyle(
+          decoration: decoration,
           color: color,
           fontWeight: fontWeight,
           fontSize: size,
           letterSpacing: letterSpacing,
-          
         ),
       ),
       overflow: textOverflow,

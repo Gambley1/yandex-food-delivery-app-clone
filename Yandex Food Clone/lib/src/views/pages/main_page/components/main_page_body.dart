@@ -70,56 +70,62 @@ class MainPageBody extends StatelessWidget {
               );
         }
       },
-      child: CustomScrollView(
-        key: const PageStorageKey<String>(
-          'main_page_key',
-        ),
-        physics: const ClampingScrollPhysics(),
-        shrinkWrap: true,
-        scrollDirection: Axis.vertical,
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.only(
-              top: kDefaultHorizontalPadding,
-            ),
-            sliver: SliverAppBar(
-              title: const KText(
-                text: '',
+      child: NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: (overscroll) {
+          overscroll.disallowIndicator();
+          return false;
+        },
+        child: CustomScrollView(
+          key: const PageStorageKey<String>(
+            'main_page_key',
+          ),
+          physics: const ClampingScrollPhysics(),
+          shrinkWrap: true,
+          scrollDirection: Axis.vertical,
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.only(
+                top: kDefaultHorizontalPadding,
               ),
-              backgroundColor: Colors.white,
-              floating: true,
-              flexibleSpace: Column(
-                children: const [
-                  SearchBar(),
+              sliver: SliverAppBar(
+                title: const KText(
+                  text: '',
+                ),
+                backgroundColor: Colors.white,
+                floating: true,
+                flexibleSpace: Column(
+                  children: const [
+                    SearchBar(),
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _appBar(context),
+                  CategoriesSlider(
+                    restaurants: restaurants,
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: kDefaultHorizontalPadding,
+                    ),
+                    child: KText(
+                      text: 'Restaurants',
+                      size: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _appBar(context),
-                CategoriesSlider(
-                  restaurants: restaurants,
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: kDefaultHorizontalPadding,
-                  ),
-                  child: KText(
-                    text: 'Restaurants',
-                    size: 26,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+            RestaurantsCard(
+              restaurants: restaurants,
             ),
-          ),
-          RestaurantsCard(
-            restaurants: restaurants,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

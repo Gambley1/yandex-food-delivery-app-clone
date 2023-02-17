@@ -1,14 +1,18 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:flutter/material.dart';
 import 'package:papa_burger/src/restaurant.dart';
 
+@immutable
 class MenuModel {
-  final Restaurant restaurant;
-  MenuModel({
-    required this.restaurant,
+  final int restaurantId;
+  const MenuModel({
+    this.restaurantId = 0,
   });
 
   // bool get hasDiscount => restaurant.discount != 0 ? true : false;
+
+  Restaurant get restaurant =>
+      RestaurantApi().getRestaurantById(restaurantId);
 
   double priceOfItem({
     required int index,
@@ -44,7 +48,7 @@ class MenuModel {
           ..add(item.price)
           ..remove(0);
         promotionItems.map(
-          (e) => e.items.add(item),
+          (menu) => menu.items.addAll(menu.items),
         );
       }
     }
@@ -55,6 +59,4 @@ class MenuModel {
     final sortedDiscounts = listDiscounts;
     return sortedDiscounts;
   }
-
-  String get stringPrice => '$priceOfItem\$';
 }

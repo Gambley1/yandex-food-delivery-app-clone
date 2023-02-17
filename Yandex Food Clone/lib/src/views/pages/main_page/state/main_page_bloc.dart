@@ -37,9 +37,7 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
       // await Future.delayed(
       //   const Duration(seconds: 1),
       // );
-      final restaurants = await api.getListRestaurants(
-        restaurantsJson(),
-      );
+      final restaurants = await api.getListRestaurants();
       if (restaurants.isNotEmpty) {
         emit(
           state.copyWith(

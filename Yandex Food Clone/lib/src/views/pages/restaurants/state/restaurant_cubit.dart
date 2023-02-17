@@ -12,9 +12,7 @@ class RestaurantCubit extends Cubit<RestaurantState> {
 
   Future<void> getRestaurants() async {
     try {
-      final restaurants = await api.getListRestaurants(
-        restaurantsJson(),
-      );
+      final restaurants = await api.getListRestaurants();
       emit(
         state.copyWtih(
           restaurants: restaurants,
@@ -24,5 +22,4 @@ class RestaurantCubit extends Cubit<RestaurantState> {
       logger.d(e.toString(), 'error in restaurant cubit');
     }
   }
-
 }

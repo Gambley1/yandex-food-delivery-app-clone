@@ -100,52 +100,68 @@ class RestaurantCard extends StatelessWidget {
     int numOfRatings,
   ) =>
       KText(
-        text: '$quality ($numOfRatings+) ',
+        text: restaurant.qualityAndNumOfRatings,
       );
 
   _buildTags(List<String> tags) => KText(
-        text: '${tags.first}, ${tags.last}',
+        text: restaurant.tagsToString,
       );
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).pushAndRemoveUntil(
-          PageTransition(
-            child: RestaurantMenusView(restaurant: restaurant),
-            type: PageTransitionType.fade,
-          ),
-          (route) => true,
-        );
-      },
-      child: Padding(
-        padding:
-            const EdgeInsets.symmetric(vertical: kDefaultHorizontalPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CachedImage(
-              height: MediaQuery.of(context).size.height * 0.2,
-              width: double.infinity,
-              imageType: CacheImageType.smallImage,
-              imageUrl: restaurantImageUrl,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: kDefaultHorizontalPadding),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(kDefaultBorderRadius),
+        onTap: () {
+          Navigator.of(context).pushAndRemoveUntil(
+            PageTransition(
+              child: RestaurantMenusView(restaurant: restaurant),
+              type: PageTransitionType.fade,
             ),
-            const SizedBox(
-              height: 6,
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                KText(
-                  text: restaurantName,
-                  size: 20,
-                  fontWeight: FontWeight.bold,
+            (route) => true,
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              InkWell(
+                borderRadius: BorderRadius.circular(kDefaultBorderRadius),
+                onTap: () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    PageTransition(
+                      child: RestaurantMenusView(restaurant: restaurant),
+                      type: PageTransitionType.fade,
+                    ),
+                    (route) => true,
+                  );
+                },
+                child: CachedImage(
+                  inkEffect: InkEffect.withEffect,
+                  height: MediaQuery.of(context).size.height * 0.2,
+                  width: double.infinity,
+                  imageType: CacheImageType.smallImage,
+                  imageUrl: restaurantImageUrl,
                 ),
-              ],
-            ),
-            _buildRestaurantInfo(rating, quality, numOfRatings, tags),
-          ],
+              ),
+              const SizedBox(
+                height: 6,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  KText(
+                    text: restaurantName,
+                    size: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ],
+              ),
+              _buildRestaurantInfo(rating, quality, numOfRatings, tags),
+            ],
+          ),
         ),
       ),
     );

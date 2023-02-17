@@ -13,7 +13,7 @@ class RestaurantMenusView extends StatelessWidget {
     required this.restaurant,
   }) : super(key: key);
 
-  late final MenuModel menuModel = MenuModel(restaurant: restaurant);
+  late final MenuModel menuModel = MenuModel(restaurantId: restaurant.id);
 
   _discountCard(List<double> discounts) {
     return SliverPadding(
@@ -115,84 +115,92 @@ class RestaurantMenusView extends StatelessWidget {
               current.cartModel.cartItems.length,
           listener: (context, state) {},
           builder: (context, state) {
-            return CustomScrollView(
-              shrinkWrap: true,
-              slivers: [
-                SliverAppBar(
-                  actionsIconTheme: const IconThemeData(
-                    color: Colors.black,
-                  ),
-                  iconTheme: const IconThemeData(
-                    color: Colors.black,
-                  ),
-                  leading: Container(
-                    height: 50,
-                    width: 50,
-                    margin:
-                        const EdgeInsets.only(left: kDefaultHorizontalPadding),
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
+            return NotificationListener<OverscrollIndicatorNotification>(
+              onNotification: (overscroll) {
+                overscroll.disallowIndicator();
+                return false;
+              },
+              child: CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    actionsIconTheme: const IconThemeData(
+                      color: Colors.black,
                     ),
-                    child: CustomIcon(
-                      size: 24,
-                      icon: FontAwesomeIcons.arrowLeft,
-                      type: IconType.iconButton,
-                      onPressed: () {
-                        navigationCubit.navigation(0);
-                        Navigator.pop(context);
-                      },
+                    iconTheme: const IconThemeData(
+                      color: Colors.black,
                     ),
-                  ),
-                  bottom: PreferredSize(
-                    preferredSize: const Size.fromHeight(
-                      20,
-                    ),
-                    child: Container(
-                      width: double.infinity,
-                      height: 25,
+                    leading: Container(
+                      height: 50,
+                      width: 50,
+                      margin: const EdgeInsets.only(
+                          left: kDefaultHorizontalPadding),
+                      alignment: Alignment.center,
                       decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(36),
-                          topRight: Radius.circular(36),
-                        ),
+                        shape: BoxShape.circle,
                         color: Colors.white,
+                      ),
+                      child: CustomIcon(
+                        size: 24,
+                        icon: FontAwesomeIcons.arrowLeft,
+                        type: IconType.iconButton,
+                        onPressed: () {
+                          navigationCubit.navigation(0);
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                    bottom: PreferredSize(
+                      preferredSize: const Size.fromHeight(
+                        20,
+                      ),
+                      child: Container(
+                        width: double.infinity,
+                        height: 25,
+                        decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(36),
+                            topRight: Radius.circular(36),
+                          ),
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    expandedHeight: 290,
+                    backgroundColor: Colors.transparent,
+                    flexibleSpace: AnnotatedRegion<SystemUiOverlayStyle>(
+                      value: MyThemeData.restaurantHeaderThemeData,
+                      child: CachedImage(
+                        inkEffect: InkEffect.noEffect,
+                        imageType: CacheImageType.bigImage,
+                        imageUrl: restaurant.imageUrl,
                       ),
                     ),
                   ),
-                  expandedHeight: 290,
-                  backgroundColor: Colors.transparent,
-                  flexibleSpace: CachedImage(
-                    imageType: CacheImageType.bigImage,
-                    imageUrl: restaurant.imageUrl,
-                  ),
-                ),
-                _discountCard(discounts),
-                for (var i = 0; i < menusCategoriesName.length; i++,) ...[
-                  menuModel.restaurant.menu[i].items.isNotEmpty
-                      ? SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              left: 12,
-                              top: 12,
+                  _discountCard(discounts),
+                  for (var i = 0; i < menusCategoriesName.length; i++,) ...[
+                    menuModel.restaurant.menu[i].items.isNotEmpty
+                        ? SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                left: 12,
+                                top: 12,
+                              ),
+                              child: KText(
+                                text: menuModel.restaurant.menu[i].categorie,
+                                size: 26,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                            child: KText(
-                              text: menuModel.restaurant.menu[i].categorie,
-                              size: 26,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        )
-                      : const SliverToBoxAdapter(child: null),
-                  MenuCard(
-                    state: state,
-                    menuModel: menuModel,
-                    i: i,
-                    menu: menuModel.restaurant.menu[i],
-                  ),
-                ]
-              ],
+                          )
+                        : const SliverToBoxAdapter(child: null),
+                    MenuCard(
+                      menuModel: menuModel,
+                      i: i,
+                      menu: menuModel.restaurant.menu[i],
+                    ),
+                  ]
+                ],
+              ),
             );
           },
         ),
